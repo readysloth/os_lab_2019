@@ -8,7 +8,8 @@ void RevertString(char *str)
 	while(*(endPtr+1) != '\0')
 	   endPtr++;
 	
-	for(int i = 0; i < (endPtr-str)/2; i++)
+	int boundary = (endPtr-str)%2 == 0 ? (endPtr-str)/2 : (endPtr-str)/2+1; 
+	for(int i = 0; i < boundary; i++)
 	   Swap(endPtr-i,str+i);
 }
 
