@@ -1,7 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-struct MinMax {
+
+struct __attribute__((packed)) MinMax {
   int min;
   int max;
 };
