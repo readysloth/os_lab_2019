@@ -115,7 +115,6 @@ int main(int argc, char **argv) {
     pipe(pipefd);
     
     pid_t currentPID;
-    remove("processOut.txt");
     
     
   for (int i = 0; i < pnum; i++) {
@@ -155,6 +154,8 @@ int main(int argc, char **argv) {
   while (active_child_processes > 0) {
     // your code here
     close(pipefd[1]);
+    
+    wait(NULL);
     printf(kill(currentPID, SIGKILL) == 0 ? "killed child process\n" : "error while killing\n");
     
     active_child_processes--;
@@ -164,7 +165,6 @@ int main(int argc, char **argv) {
   min_max.min = INT_MAX;
   min_max.max = INT_MIN;
 
-    waitpid(currentPID);
 
   for (int i = 0; i < pnum; i++) {
     struct MinMax mm;
@@ -199,5 +199,7 @@ int main(int argc, char **argv) {
   printf("Max: %d\n", min_max.max);
   printf("Elapsed time: %fms\n" COLOR _NC, elapsed_time);
   fflush(NULL);
+  
+    remove("processOut.txt");
   return 0;
 }
