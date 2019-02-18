@@ -37,9 +37,9 @@ int main(int argc, char **argv) {
    *	seed by command line arguments
    */
 
-  uint32_t threads_num = 0;
-  uint32_t array_size = 0;
-  uint32_t seed = 0;
+  uint32_t threads_num = -1;
+  uint32_t array_size = -1;
+  uint32_t seed = -1;
   
   while (true) {
     int current_optind = optind ? optind : 1;
@@ -88,7 +88,11 @@ int main(int argc, char **argv) {
     }
     
   }
-  
+  if (seed == -1 || array_size == -1 || threads_num == -1) {
+    printf("Usage: %s --threads_num \"num\" --seed \"num\" --array_size \"num\"\n",
+           argv[0]);
+    return 1;
+  }
   
   pthread_t threads[threads_num];
   
