@@ -19,18 +19,18 @@
 
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 typedef struct {
-    int begin;
-    int current;
-    int end;
-    int mod;
+     uint64_t begin;
+     uint64_t current;
+     uint64_t end;
+     uint64_t mod;
     
 } Args;
 
-int fact(Args* arg){
+uint64_t fact(Args* arg){
     
     printf(COLOR _BOLD _YELLOW "\tArgs"\
            COLOR _BOLD _MAGENTA " %p"\
-           COLOR _BOLD _YELLOW " are {begin: %i current: %i end: %i mod: %i}" COLOR _NC "\n",\
+           COLOR _BOLD _YELLOW " are {begin: %d current: %d end: %d mod: %d}" COLOR _NC "\n",\
                                     arg,\
                                     arg->begin,\
                                     arg->current,\
@@ -111,38 +111,42 @@ int main(int argc, char **argv)
   
   
   pthread_t threads[pnum];
-  int part;
+  uint64_t part;
   
-  if(pnum > k)
+    printf(COLOR _BOLD _BLUE"BEFORE: [part: %d k: %d pnum: %d]\n" COLOR _NC "\n", k/pnum, k, pnum);
+  
+  if(k/pnum < 2)
     part = k,pnum = 1;
   else
     part = k/pnum;
     
-  printf(COLOR _BOLD _BLUE"part: %i k: %i pnum: %i\n" COLOR _NC "\n", part, k, pnum);
+  printf(COLOR _BOLD _BLUE"AFTER: [part: %d k: %d pnum: %d]\n" COLOR _NC "\n", part, k, pnum);
   
   Args args[pnum];
-  for (uint32_t i = 0; i < pnum; i++) {
-    printf("i: %i\n",i);
+  for (uint32_t i = 0, j = 0; i < pnum; i++, j = i + 1) {
+    printf("i: %d\n",i);
     
-    if(pnum != 1&& i + 1 == pnum && pnum*part <= k)
-        args[i] = (Args){(i+1)*part + 1, (i+1)*part + 1, k, mod};
+    
+    if(pnum != 1 && j == pnum && pnum*part <= k)
+        args[i] = (Args){i*part + 1, i*part + 1, k, mod};
     else
         if(i == 0)
             args[i] = (Args){1, 1, part, mod};
         else
-            args[i] = (Args){i*part + 1, i*part + 1, (i+2)*part, mod};
+            args[i] = (Args){i*part + 1, i*part + 1, j*part, mod};
         
     printf(COLOR _THIN _YELLOW "\tArgs"\
            COLOR _THIN _MAGENTA "[%p]"\
-           COLOR _THIN _YELLOW  " are {begin: %i current: %i end: %i mod: %i}" COLOR _NC "\n",\
+           COLOR _THIN _YELLOW  " are {begin: %d current: %d end: %d mod: %d}" COLOR _NC "\n",\
                                     &args[i],\
                                     args[i].begin,\
                                     args[i].current,\
                                     args[i].end,\
                                     args[i].mod);
                                     
-    printf(COLOR _THIN _GREEN "values are {i: %i current: %i end: %i mod: %i}" COLOR _NC "\n",\
+    printf(COLOR _THIN _GREEN "values are {i: %d j: %d current: %d end: %d mod: %d}" COLOR _NC "\n",\
                                     i,\
+                                    j,\
                                     i*part,\
                                     (i+1)*part,\
                                     mod);
@@ -153,11 +157,11 @@ int main(int argc, char **argv)
     }
   }
   
-  int result = 1;
+  uint64_t result = 1;
   for (uint32_t i = 0; i < pnum; i++) {
-    int res = 0;
+     uint64_t res = 0;
     pthread_join(threads[i], (void **)&res);
-    printf(COLOR _THIN _RED "res: %i" COLOR _NC "\n",\
+    printf(COLOR _THIN _RED "res: %d" COLOR _NC "\n",\
                                     res);
                                     
     pthread_mutex_lock(&mut);
@@ -166,6 +170,6 @@ int main(int argc, char **argv)
     pthread_mutex_unlock(&mut);
   }
   
-  printf(COLOR _BOLD _GREEN "Result is %i" COLOR _NC "\n",result);
+  printf(COLOR _BOLD _GREEN "Result is %d" COLOR _NC "\n",result);
   return 0;
 }
