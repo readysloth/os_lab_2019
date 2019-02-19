@@ -28,24 +28,22 @@
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
 uint64_t Factorial(const struct FactorialArgs *args) {
-  uint64_t ans = args->begin;
-
-  if(args->begin < args->end){
-        struct FactorialArgs new_args;
-        new_args.begin = args->begin + 1;
-        new_args.end = args->end;
-        new_args.mod = args->mod;
+  uint64_t ans = 1;
+  printf("[ans: %llu]\n", ans);
+  for(uint64_t i = 0; args->begin + i <= args->end; i++){        
+        ans *= (args->begin + i);
+        //ans %= args->mod;
         
-        ans *= new_args.begin;
-        ans %= args->mod;
-        
-        printf(COLOR _BOLD _YELLOW "begin: %llu end: %llu mod: %llu \n\t passed_val: %llu" COLOR _NC "\n",\
-                                                        new_args.begin,\
-                                                        new_args.end,\
-                                                        new_args.mod,\
-                                                        args->begin);
-        ans = Factorial(&new_args);
+        printf(COLOR _BOLD _YELLOW "begin + i: %llu end: %llu mod: %llu \n\t ans: %llu" COLOR _NC "\n",\
+                                                        args->begin + i,\
+                                                        args->end,\
+                                                        args->mod,\
+                                                        ans);
+                                                        
+                                                       
+        printf(COLOR _THIN _YELLOW "ans: %llu" COLOR _NC "\n", ans);
     }
+    
     printf(COLOR _THIN _YELLOW "ans: %llu" COLOR _NC "\n", ans);
   return ans;
 }
@@ -174,15 +172,44 @@ int main(int argc, char **argv) {
 
       fprintf(stdout, "Receive: %llu %llu %llu\n", begin, end, mod);
 
+      printf("RECIEVED: [begin: %llu end: %llu mod: %llu]\n", begin, end, mod);
       struct FactorialArgs args[tnum];
-      for (uint32_t i = 0; i < tnum; i++) {
+      
+      uint64_t part;
+      uint64_t real_tnum = tnum;
+      uint64_t size = end-begin;
+      if(size/tnum < 2)
+        part = size, real_tnum = 1;
+      else
+        part = size/tnum;
+      
+      for (uint32_t i = 0, j = 1; i < real_tnum; i++, j=i+1) {
         // TODO: parallel somehow 
         
-        args[i].begin = begin;
+            
+        //pthread_mutex_lock(&mut);
+        
+        /*
+        args[i].begin = begin*part;
         args[i].end = end;
         args[i].mod = mod;
+        */
+        args[i].mod = mod;
+        if(real_tnum != 1 && j == real_tnum && real_tnum*part <= end){
+            args[i].begin = i*part + 1;
+            args[i].end = end;
+        }
+        else
+            if(i == 0){
+                args[i].begin = begin;
+                args[i].end = begin + part;
+            }
+            else{
+                args[i].begin = i*part + 1;
+                args[i].end = j*part;
+            }
               
-        pthread_mutex_unlock(&mut);
+        //pthread_mutex_unlock(&mut);
 
         if (pthread_create(&threads[i], NULL, ThreadFactorial,
                            (void *)&args[i])) {
