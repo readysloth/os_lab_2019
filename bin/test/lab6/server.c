@@ -29,12 +29,11 @@ pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
 uint64_t Factorial(const struct FactorialArgs *args) {
   uint64_t ans = 1;
-  printf("[ans: %llu]\n", ans);
   for(uint64_t i = 0; args->begin + i <= args->end; i++){        
         ans *= (args->begin + i);
         //ans %= args->mod;
         
-        printf(COLOR _BOLD _YELLOW "begin + i: %llu end: %llu mod: %llu \n\t ans: %llu" COLOR _NC "\n",\
+        printf(COLOR _BOLD _YELLOW "begin+i: %llu end: %llu mod: %llu \n\t ans: %llu" COLOR _NC "\n",\
                                                         args->begin + i,\
                                                         args->end,\
                                                         args->mod,\
@@ -44,7 +43,6 @@ uint64_t Factorial(const struct FactorialArgs *args) {
         printf(COLOR _THIN _YELLOW "ans: %llu" COLOR _NC "\n", ans);
     }
     
-    printf(COLOR _THIN _YELLOW "ans: %llu" COLOR _NC "\n", ans);
   return ans;
 }
 
@@ -219,13 +217,30 @@ int main(int argc, char **argv) {
       }
 
       uint64_t total = 1;
-      for (uint32_t i = 0; i < tnum; i++) {
+          
+      printf(COLOR _THIN _GREEN "tnum: %llu real_tnum: %llu" COLOR _NC "\n", tnum, real_tnum);
+      for (uint32_t i = 0; i < real_tnum; i++) {
                
                ///mycode
         pthread_mutex_lock(&mut);
         uint64_t result = 0;
         pthread_join(threads[i], (void **)&result);
-        total = MultModulo(total, result, mod);
+            
+        printf("\ttotal in cycle: %llu\n\tresult in cycle: %llu\n", total, result);
+        
+        if(i == 0)
+            total = result % mod;
+        else
+            total *= result, total %= mod;
+        
+        
+        /*if(real_tnum < tnum)
+            for(uint32_t j = 0; j < tnum; j++)
+                    total = MultModulo(total, result, mod);
+        else
+            total = MultModulo(total, result, mod);
+            */
+        
         pthread_mutex_unlock(&mut);
       }
 

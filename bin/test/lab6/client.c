@@ -236,7 +236,7 @@ int main(int argc, char **argv) {
   uint64_t real_result = 1;
   
   for(int i = 0; i < servers_num; i++)
-    real_result *= partial_res[i];
+    real_result *= partial_res[i], real_result %= mod;
 
   printf(COLOR _BOLD _GREEN "Final result: %llu" COLOR _NC "\n",\
                                     real_result);
