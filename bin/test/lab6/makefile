@@ -8,7 +8,7 @@ libFact.so : libFact.h
 	$(CC) -o libFact.so -shared libFact.o
 
 server: libFact.so
-	$(CC) -c server.c -o server.o=
+	$(CC) -c server.c -o server.o
 	$(CC) -o server server.o -L$(shell pwd) -lFact -pthread -Wl,-rpath=$(shell pwd) $(CFLAGS)
 
 client: libFact.so
