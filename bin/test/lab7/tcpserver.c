@@ -8,11 +8,29 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 #include <getopt.h>
+#define LEN(X) (sizeof(X)/sizeof(X[0]))
 
 #define SADDR struct sockaddr
 
+#define COLOR "\033"
+#define _BOLD "[1"
+#define _THIN "[0"
+#define _RED ";31m"
+#define _BLUE ";34m"
+#define _GREEN ";32m"
+#define _YELLOW ";33m"
+#define _NC "[0m"
+
 int main(int argc, char **argv) {
+
+
+    
+    pid_t child_pid[4];
     
   int BUFSIZE = -1;
   int SERV_PORT = -1;
@@ -63,6 +81,27 @@ int main(int argc, char **argv) {
     return 1;
   }  
     
+    pid_t currentPID;
+    int i = 0;
+    char ports[LEN(child_pid)][100];
+    
+    for( ; i < LEN(child_pid); i++){
+        currentPID = fork();
+        child_pid[i] = currentPID;
+        if(currentPID)
+            sprintf(ports[i],"%d",SERV_PORT);
+        if(!currentPID)
+            break;
+    }
+        
+  printf(COLOR _BOLD _RED "\n\tPARENT: %d, this->PID: %d, CHILD: %s\n" COLOR _NC, getppid(), getpid(), currentPID ? "no" : "yes");
+  //PORT = pid now
+
+  if(!currentPID)
+      SERV_PORT = getpid(),sleep(3);
+
+  printf("SERV_PORT: %i\n",SERV_PORT);
+    
   const size_t kSize = sizeof(struct sockaddr_in);
 
   int lfd, cfd;
@@ -81,6 +120,7 @@ int main(int argc, char **argv) {
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   servaddr.sin_port = htons(SERV_PORT);
 
+
   if (bind(lfd, (SADDR *)&servaddr, kSize) < 0) {
     perror("bind");
     exit(1);
@@ -91,23 +131,37 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
+
   while (1) {
     unsigned int clilen = kSize;
 
     if ((cfd = accept(lfd, (SADDR *)&cliaddr, &clilen)) < 0) {
+
       perror("accept");
       exit(1);
     }
-    printf("connection established\n");
+     
+    nread = read(cfd, buf, BUFSIZE);
+   
+    printf("nread: %i\n",nread);
+    while (nread > 0) {
+        printf(COLOR _BOLD _GREEN "\n\tMessage %s recieved, this->PID: %d, CHILD: %s\n" COLOR _NC, buf, getpid(), currentPID ? "no" : "yes");
+        
+            sleep(5);
+      if(!currentPID)
+        sleep(5),printf(COLOR _BOLD _YELLOW "\n\tPARENT: %d, this->PID: %d, MESSAGE:%s\n" COLOR _NC, getppid(), getpid(), buf);//write(1, &buf, nread);
+      if(currentPID){
+            sleep(1);
+            execl("tcpclient", "tcpclient", "--bufsize", "100", "--serv_port", ports[rand()%4], "--addr", "127.0.0.1", "--message", buf, NULL); 
+        }
 
-    while ((nread = read(cfd, buf, BUFSIZE)) > 0) {
-      write(1, &buf, nread);
     }
-
+ 
     if (nread == -1) {
       perror("read");
       exit(1);
     }
     close(cfd);
+
   }
 }

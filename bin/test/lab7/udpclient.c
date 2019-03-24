@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
     
   }
   if (BUFSIZE == -1 || SERV_PORT == -1) {
-    printf("Usage: %s --bufsize \"buffer_size\" --serv_port \"serv_port\"\n",
+    printf("Usage: %s --bufsize \"buffer_size\" --serv_port \"serv_port\" --addr \"address\"\n",
            argv[0]);
     return 1;
   }  
@@ -77,10 +77,10 @@ int main(int argc, char **argv) {
   struct sockaddr_in servaddr;
   struct sockaddr_in cliaddr;
 
-  if (argc != 2) {
+  /*if (argc != 3) {
     printf("usage: client <IPaddress of server>\n");
     exit(1);
-  }
+  }*/
 
   memset(&servaddr, 0, sizeof(servaddr));
   servaddr.sin_family = AF_INET;

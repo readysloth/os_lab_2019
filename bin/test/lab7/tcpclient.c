@@ -8,23 +8,36 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+
 #include <getopt.h>
 
 #define SADDR struct sockaddr
 #define SIZE sizeof(struct sockaddr_in)
+#define COLOR "\033"
+#define _BOLD "[1"
+#define _THIN "[0"
+#define _RED ";31m"
+#define _BLUE ";34m"
+#define _GREEN ";32m"
+#define _YELLOW ";33m"
+#define _NC "[0m"
 
 int main(int argc, char *argv[]) {
   
   int BUFSIZE = -1;
+  for(int i = 0; i < argc; i++)
+    printf(COLOR _THIN _YELLOW "\t| %s\n" COLOR _NC, argv[i]);
   
   int SERV_PORT = -1;
   char* ADDR;
+  char* MESSAGE;
   while (true) {
     int current_optind = optind ? optind : 1;
 
     static struct option options[] = {{"bufsize", required_argument, 0, 0},
                                       {"serv_port", required_argument, 0, 0},
                                       {"addr", required_argument, 0, 0},
+                                      {"message", required_argument, 0, 0},
                                       {0, 0, 0, 0}};
 
     int option_index = 0;
@@ -51,6 +64,9 @@ int main(int argc, char *argv[]) {
             break;
             case 2:
             ADDR = optarg;
+            break;
+            case 3:
+            MESSAGE = optarg;
             break;
         }
 
@@ -98,12 +114,13 @@ int main(int argc, char *argv[]) {
   }
 
   write(1, "Input message to send\n", 22);
-  while ((nread = read(0, buf, BUFSIZE)) > 0) {
-    if (write(fd, buf, nread) < 0) {
+  //while ((nread = read(0, buf, BUFSIZE)) > 0) {
+    //if (write(fd, buf, nread) < 0) {
+    if (write(fd, MESSAGE, strlen(MESSAGE)) < 0) {
       perror("write");
       exit(1);
     }
-  }
+  //}
 
   close(fd);
   exit(0);
